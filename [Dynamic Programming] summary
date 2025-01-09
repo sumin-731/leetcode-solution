@@ -1,0 +1,98 @@
+Optimization problem
+  - 문제를 해결하는 최적의 답을 찾아야 하는 문제
+  - optimal solution은 하나 이상일 수 있다.
+  - maximum 혹은 minimum value를 가지는 solution을 찾는 문제들이 주를 이룬다
+  - ex 가장 빨리 도착하는 경로의 소요시간은? 언제 주식을 사고 팔 때 가장 수익이 높은지?
+
+Dynamic Programming (DP)
+  - optimization problem을 해결하는 전략 중 하나
+  - subproblem과 optimal solution을 활용해서 최적솔루션을 찾는 방식
+  - 겹치는(overlapping) subproblems은 한 번만 계산하고 그 결과를 저장한 뒤 재사용한다 ==> cache 방식
+
+DP의 두 가지 접근 방식
+1. Top-Down 접근방식
+  -> 큰 문제를 해결하기 위해 작은 문제로 나누어 해결
+  구조: recursive (function call을 재귀적으로 호출)
+  subproblem 결과 저장: memoization (function call로 도출된 결과를 저장해놓고 다음 번에 같은 input에 대 호출이 일어났을 땐 캐시에서 꺼내쓰는 방식)
+  언제 선호되는지?: subproblems의 일부만 계산해도 최종 optimal solution을 구할 수 있을 때
+2. Bottom-up 접근방식
+  -> 작은 문제부터 해결해서 큰 문제로 올라감
+  구조: iterative (for loop 계산)
+  subproblem 결과 저장: tabulation (for loop을 돌면서 작은 규모의 subproblems부터 차례차례 해결해나감)
+  언제 선호되는지?: 모든 subproblems을 계산해야 최종 optimal solution을 구할 수 있을 때
+
+
+DP를 사용한 알고리즘 설계 순서
+    1. 주어진 문제의 optimal solution이 구조적으로 어떤 특징을 가지는지 분석
+    2. 재귀적인 형태로 optimal solution의 value를 정의
+    3. (주로) Bottom-Up 방식으로 optimal solution의 value를 구한다
+    (4.) 지금까지 계산된 정보를 바탕으로 optimal solution을 구한다 
+
+
+### 예제] Climbing Stairs
+
+### 1. Top-down 방식 (재귀 + 메모이제이션)
+```javascript
+function climbStairs(n) {
+    const memo = {};
+
+    function dp(i) {
+        if (i in memo) return memo[i];
+        if (i <= 2) return i;
+        memo[i] = dp(i - 1) + dp(i - 2);
+        return memo[i];
+    }
+
+    return dp(n);
+}
+
+// 예시 실행
+console.log(climbStairs(5)); // 출력: 8
+```
+
+#### 설명
+1. `memo` 객체는 계산된 값을 저장합니다.
+2. 재귀적으로 \( f(n-1) + f(n-2) \)를 계산하며, 저장된 값을 재사용합니다.
+3. 기저 조건:
+   - \( f(1) = 1 \)
+   - \( f(2) = 2 \)
+
+---
+
+### 2. Bottom-up 방식 (반복문)
+```javascript
+function climbStairs(n) {
+    if (n <= 2) return n;
+
+    let prev = 1, curr = 2; // f(1), f(2)
+    for (let i = 3; i <= n; i++) {
+        let next = prev + curr; // f(n) = f(n-1) + f(n-2)
+        prev = curr;           // 업데이트: f(n-2)
+        curr = next;           // 업데이트: f(n-1)
+    }
+
+    return curr;
+}
+
+// 예시 실행
+console.log(climbStairs(5)); // 출력: 8
+```
+
+#### 설명
+1. \( f(1) \)과 \( f(2) \)를 변수 `prev`와 `curr`에 저장합니다.
+2. 반복문을 통해 \( f(n) = f(n-1) + f(n-2) \)를 계산하며 값을 갱신합니다.
+3. 상수 공간을 사용하여 메모리 효율성이 높습니다.
+
+---
+
+### 실행 결과
+- 입력 `n = 5`일 때, 출력은 `8`입니다. 이는 \( [1,1,1,1,1], [1,1,1,2], [1,1,2,1], [1,2,1,1], [2,1,1,1], [1,2,2], [2,1,2], [2,2,1] \)로 총 8가지 경우의 수가 있기 때문입니다.
+
+--- 
+
+### 비교
+| 방식                | 시간 복잡도 | 공간 복잡도 | 특징                                                                |
+|---------------------|-------------|-------------|------------------------------------------------------------------|
+| Top-down            | \( O(n) \)  | \( O(n) \)  | 재귀 호출 및 메모이제이션을 사용. 적은 데이터를 다룰 때 적합.         |
+| Bottom-up           | \( O(n) \)  | \( O(1) \)  | 반복문과 상수 공간을 사용. 큰 데이터를 다룰 때 효율적.               |
+두 방식 모두 효율적으로 사용할 수 있으며, Bottom-up 방식은 대규모 입력에서 메모리를 절약하는 데 적합합니다.
